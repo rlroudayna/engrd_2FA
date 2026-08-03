@@ -7,6 +7,7 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const { authenticateAdmin } = require('../middleware/authMiddleware');
 const AdminTwoFactor = require('../models/AdminTwoFactor');
+const AdminCredentials = require('../models/AdminCredentials');
 const { encrypt, decrypt } = require('../utils/crypto');
 
 // All 2FA routes require a valid admin JWT
@@ -99,10 +100,18 @@ router.post('/disable', async (req, res) => {
     const { password, token } = req.body;
     const username = req.user.username;
 
-    // Verify password against env
-    const adminPassword = process.env.ADMIN_PASSWORD;
-    if (password !== adminPassword) {
-      return res.status(401).json({ success: false, message: 'Mot de passe incorrect' });
+    // Verify password against DB (with .env fallback)
+    const creds = await AdminCredentials.findOne({ username });
+    let passwordOk = false;
+    if (creds) {
+      passwordOk = await bcrypt.compare(password, creds.passwordHash);
+    } else {
+      // fallback to .env if DB record doesn't exist yet
+      passwordOk = (password === process.env.ADMIN_PASSWORD);
+    }
+
+    if (!passwordOk) {
+      return res.status(400).json({ success: false, message: 'Mot de passe incorrect' });
     }
 
     const record = await AdminTwoFactor.findOne({ username });

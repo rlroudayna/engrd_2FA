@@ -211,10 +211,10 @@ export default function ApplicationList() {
                   </div>
                   
                   <div className="card-content">
-                    <h3 className="candidate-name">{app.firstName} {app.lastName}</h3>
+                    <h3 className="candidate-name" style={{overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontWeight: 600, fontSize: '1rem'}}>{app.firstName} {app.lastName}</h3>
                     
-                    {/* Affichage proéminent du nom de l'offre */}
-                    {app.jobId && (
+                    {/* Affichage proéminent du nom de l'offre ou placeholder spontanée */}
+                    {app.jobId ? (
                       <div className="job-applied-prominent">
                         <span className="job-icon">🎯</span>
                         <span className="job-title-main">
@@ -223,12 +223,11 @@ export default function ApplicationList() {
                         {app.jobId.location && (
                           <span className="job-location">📍 {app.jobId.location}</span>
                         )}
-                        {/* Debug info - à supprimer après test */}
-                        {!app.jobId.title && (
-                          <span className="debug-info" style={{fontSize: '0.8rem', color: 'red'}}>
-                            [Debug: jobId={app.jobId._id || 'no-id'}, title={app.jobId.title || 'undefined'}]
-                          </span>
-                        )}
+                      </div>
+                    ) : (
+                      <div className="job-applied-prominent" style={{background:'rgba(100,100,100,0.07)', border:'1px solid rgba(100,100,100,0.15)'}}>
+                        <span className="job-icon">✨</span>
+                        <span className="job-title-main" style={{color:'#666'}}>Candidature spontanée</span>
                       </div>
                     )}
                     
